@@ -2,13 +2,25 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html">
-    <title>SlickGrid example 1: Basic grid</title>
+    <title>SlickGrid Filter and Overlay example</title>
     <link rel="stylesheet" href="../css/slick.grid.css" type="text/css" />
     <link rel="stylesheet" href="../plugins-common.css" type="text/css" />
     <link rel="stylesheet" href="../plugins-excel-style.css" type="text/css" />
+    <style>
+        #status {
+            width: 100%;
+            background-color: #217346;
+            color: white;
+            padding: 4px;
+            height: 16px;
+        }
+    </style>
 </head>
 <body>
     <div id="grid" class="excel-grid">
+    </div>
+    <div id="status">
+        <label id="status-label"></label>
     </div>
     <script type="text/javascript" src="../scripts/jquery-1.10.1.js"></script>
     <script type="text/javascript" src="../scripts/jquery.event.drag.js"></script>
@@ -32,13 +44,13 @@
     { id: "start", name: "Start", field: "start", width: 80 },
     { id: "finish", name: "Finish", field: "finish", width: 80 },
     { id: "effort-driven", name: "Effort Driven", field: "effortDriven", width: 120 }
-  ];
+        ];
 
         var options = {
             enableCellNavigation: true,
             enableColumnReorder: false,
             explicitInitialization: true,
-            editable:true
+            editable: true
         };
 
         $(function () {
@@ -81,12 +93,21 @@
             filterPlugin.onFilterApplied.subscribe(function () {
                 dataView.refresh();
                 grid.resetActiveCell();
+
+                var status;
+
+                if (dataView.getLength() === dataView.getItems().length) {
+                    status = "";
+                } else {
+                    status = dataView.getLength() + ' OF ' + dataView.getItems().length + ' RECORDS FOUND';
+                }
+                $('#status-label').text(status);
             });
 
             filterPlugin.onCommand.subscribe(function (e, args) {
                 var comparer = function (a, b) {
                     return a[args.column.field] > b[args.column.field];
-                }
+                };
 
                 switch (args.command) {
                     case "sort-asc":
@@ -141,7 +162,7 @@
                 }
                 return value;
             }
-        })
+        });
     </script>
 </body>
 </html>

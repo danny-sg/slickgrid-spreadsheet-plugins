@@ -55,8 +55,8 @@
             var column = args.column;
 
             var $el = $("<div></div>")
-                          .addClass("slick-header-menubutton")
-                          .data("column", column)
+                .addClass("slick-header-menubutton")
+                .data("column", column);
 
             if (options.buttonImage) {
                 $el.css("background-image", "url(" + options.buttonImage + ")");
@@ -71,12 +71,12 @@
                 .remove();
         }
 
-        function addMenuItem($menu, columnDef, title, command, image) {
+        function addMenuItem(menu, columnDef, title, command, image) {
             var $item = $("<div class='slick-header-menuitem'>")
                          .data("command", command)
                          .data("column", columnDef)
                          .bind("click", handleMenuItemClick)
-                         .appendTo($menu);
+                         .appendTo(menu);
 
             var $icon = $("<div class='slick-header-menuicon'>")
                          .appendTo($item);
@@ -132,10 +132,10 @@
 
             $('<button>OK</button>')
                 .appendTo($menu)
-                .bind('click', function (e) {
+                .bind('click', function (ev) {
                     columnDef.filterValues = workingFilters.splice(0);
                     setButtonImage($menuButton, columnDef.filterValues.length > 0);
-                    handleApply(e, columnDef);
+                    handleApply(ev, columnDef);
                 });
 
             $('<button>Clear</button>')
@@ -151,12 +151,13 @@
                 .bind('click', hideMenu);
 
             $(':checkbox', $filter).bind('click', function () {
-                workingFilters = checkboxClick(filterItems, workingFilters, $(this));
+                workingFilters = changeWorkingFilter(filterItems, workingFilters, $(this));
             });
 
-            var left = $(this).offset().left - $menu.width() + $(this).width() - 8;
+            var offset = $(this).offset();
+            var left = offset.left - $menu.width() + $(this).width() - 8;
 
-            $menu.css("top", $(this).offset().top + $(this).height())
+            $menu.css("top", offset.top + $(this).height())
                  .css("left", (left > 0 ? left : 0));
         }
 
@@ -164,11 +165,12 @@
             hideMenu();
         }
 
-        function checkboxClick(filterItems, workingFilters, $checkbox) {
+        function changeWorkingFilter(filterItems, workingFilters, $checkbox) {
             var value = $checkbox.val();
             var $filter = $checkbox.parent().parent();
 
             if ($checkbox.val() < 0) {
+                // Select All
                 if ($checkbox.prop('checked')) {
                     $(':checkbox', $filter).prop('checked', true);
                     workingFilters = filterItems.slice(0);
@@ -209,13 +211,13 @@
 
         function getFilterValues(dataView, column) {
             var seen = [];
-            for (var i = 0; i < dataView.getLength(); i++) {
+            for (var i = 0; i < dataView.getLength() ; i++) {
                 var value = dataView.getItem(i)[column.field];
 
                 if (!_.contains(seen, value)) {
                     seen.push(value);
                 }
-            };
+            }
 
             return _.sortBy(seen, function (v) { return v; });
         }
@@ -224,6 +226,7 @@
             var seen = [];
             for (var i = 0; i < data.length; i++) {
                 var value = data[i][column.field];
+
                 if (!_.contains(seen, value)) {
                     seen.push(value);
                 }
@@ -238,7 +241,7 @@
 
             hideMenu();
 
-            if (command != null && command != '') {
+            if (command !== null && command !== '') {
                 self.onCommand.notify({
                     "grid": grid,
                     "column": columnDef,

@@ -41,7 +41,7 @@
 
         function destroy() {
             handler.unsubscribeAll();
-            selectionOverlay.$handle.unbind("mousedown", handleBodyMouseDown)
+            selectionOverlay.$handle.unbind("dragstart", handleOverlayDragStart)
                                     .unbind('drag', handleOverlayDrag)
                                     .unbind('dragend', handleOverlayDragEnd);
         }
@@ -56,15 +56,14 @@
 
         function createSelectionOverlay() {
             var canvas = grid.getCanvasNode();
-            var selectionOverlay = new Overlay(canvas);
+            var overlay = new Overlay(canvas);
 
-            selectionOverlay
-              .$handle
+            overlay.$handle
               .bind('dragstart', handleOverlayDragStart)
               .bind('drag', handleOverlayDrag)
               .bind('dragend', handleOverlayDragEnd);
 
-            return selectionOverlay;
+            return overlay;
         }
 
         function activeCellChanged(e, args) {
@@ -119,9 +118,9 @@
                                        gridPosition.width - cellPosition.left + 4);
 
             $headerOverlay.css({
-                left: cellPosition.left,
+                left: cellPosition.left - 2,
                 top: gridPosition.top + headerHeight - 2,
-                width: headerWidth,
+                width: headerWidth + 2,
                 height: 2
             });
 
@@ -143,7 +142,7 @@
 
             var column = grid.getColumns()[activeCell.cell];
             selectionOverlay.toggle(true);
-                   
+
             var position = grid.getCellNodeBox(activeCell.row, activeCell.cell);
 
             // Not coming through on the property so re-calculated
@@ -264,16 +263,16 @@
             this.$bottom = $('<div>').addClass('header-overlay').appendTo(target);
             this.$handle = $('<div>').addClass("handle-overlay").appendTo(target);
 
-            this.toggle = function (showOrHide) {
+            this.toggle = function(showOrHide) {
                 this.$left.toggle(showOrHide);
                 this.$right.toggle(showOrHide);
                 this.$top.toggle(showOrHide);
                 this.$bottom.toggle(showOrHide);
                 this.$handle.toggle(showOrHide);
-            }
+            };
         }
 
-        function overlayRangeDecorator(grid) {
+        function overlayRangeDecorator(targetGrid) {
             var decorator;
             var r;
 
@@ -283,8 +282,8 @@
                     decorator = new Overlay(grid.getCanvasNode());
                 }
 
-                var from = grid.getCellNodeBox(range.fromRow, range.fromCell);
-                var to = grid.getCellNodeBox(range.toRow, range.toCell);
+                var from = targetGrid.getCellNodeBox(range.fromRow, range.fromCell);
+                var to = targetGrid.getCellNodeBox(range.toRow, range.toCell);
 
                 decorator.$left.css({
                     top: from.top - 2,
