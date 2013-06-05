@@ -69,7 +69,7 @@
 
         function activeCellChanged(e, args) {
             dragDecorator.hide();
-            
+
             moveSelectionOverlay(e, args);
             moveHeaderRowOverlays(e, args);
         }
@@ -137,12 +137,13 @@
             var activeCell = grid.getActiveCell();
 
             if (!activeCell) {
-                selectionOverlay.hide();
+                selectionOverlay.toggle(false);
                 return;
             }
 
-            selectionOverlay.show();
-
+            var column = grid.getColumns()[activeCell.cell];
+            selectionOverlay.toggle(true);
+                   
             var position = grid.getCellNodeBox(activeCell.row, activeCell.cell);
 
             // Not coming through on the property so re-calculated
@@ -263,20 +264,12 @@
             this.$bottom = $('<div>').addClass('header-overlay').appendTo(target);
             this.$handle = $('<div>').addClass("handle-overlay").appendTo(target);
 
-            this.show = function () {
-                this.$left.show();
-                this.$right.show();
-                this.$top.show();
-                this.$bottom.show();
-                this.$handle.show();
-            }
-
-            this.hide = function () {
-                this.$left.hide();
-                this.$right.hide();
-                this.$top.hide();
-                this.$bottom.hide();
-                this.$handle.hide();
+            this.toggle = function (showOrHide) {
+                this.$left.toggle(showOrHide);
+                this.$right.toggle(showOrHide);
+                this.$top.toggle(showOrHide);
+                this.$bottom.toggle(showOrHide);
+                this.$handle.toggle(showOrHide);
             }
         }
 
@@ -337,7 +330,7 @@
 
             function hide() {
                 if (decorator) {
-                    decorator.hide();
+                    decorator.toggle(false);
                     decorator = null;
                 }
             }
@@ -346,11 +339,11 @@
                 decorator.$handle.hide();
             }
 
-            return { 
-                     hide: hide,
-                     hideHandle: hideHandle,
-                     show: show,
-                     getSelectedRange: getSelectedRange
+            return {
+                hide: hide,
+                hideHandle: hideHandle,
+                show: show,
+                getSelectedRange: getSelectedRange
             };
         }
 
