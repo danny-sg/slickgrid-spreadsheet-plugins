@@ -144,7 +144,6 @@
             selectionOverlay.toggle(true);
 
             // Only show the handle if the cell is editable
-            console.log(typeof (column.editor) === 'undefined');
             selectionOverlay.$handle.toggle(typeof (column.editor) !== 'undefined');
 
             var position = grid.getCellNodeBox(activeCell.row, activeCell.cell);
@@ -190,8 +189,6 @@
         }
 
         function handleOverlayDragStart(e, dd) {
-            var canvas = grid.getCanvasNode();
-
             var cell = grid.getActiveCell();
 
             if (grid.canCellBeSelected(cell.row, cell.cell)) {
@@ -200,7 +197,7 @@
             }
 
             if (!handleDragging) {
-                return;
+                return null;
             }
 
             grid.focus();
