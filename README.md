@@ -18,4 +18,8 @@ This plugin creates additional overlays/adorners for the grid.
 - Rows and Grids are hilighted based on the selected cell
 - The selected cell has a full border around it, including a handle to enable a Fill Down type functionality
 
-For examples of the both plugins see: http://danny-sg.github.io/slickgrid-spreadsheet-plugins/examples/example-1-everything.htm
+For examples of the both plugins see:
+
+
+http://danny-sg.github.io/slickgrid-spreadsheet-plugins/examples/example-1-everything.htm (Excel style)
+http://danny-sg.github.io/slickgrid-spreadsheet-plugins/examples/example-2-everything.htm (Google Docs style)
