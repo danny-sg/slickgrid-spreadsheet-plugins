@@ -13,7 +13,7 @@ body, BUTTON {
     border-color: transparent #D4D4D4 #D4D4D4 transparent;
     border-style: solid solid solid solid;
     border-width: 0px 1px 1px 0px;
-    padding: 4px 4px 0px 6px;
+    padding: 1px 1px 0px 2px;
     background-color: White;
     font: 11pt Calibri, 'Segoe UI',Arial,Verdana,Sans-Serif;
 }
