@@ -71,7 +71,8 @@
             enableCellNavigation: true,
             enableColumnReorder: false,
             explicitInitialization: true,
-            editable: true
+            editable: true,
+            rowHeight: 22
         };
 
         $(function () {
@@ -82,12 +83,13 @@
                     title: "Task " + i,
                     duration: i % 20 + " days",
                     percentComplete: Math.round(Math.random() * 100),
-                    start: "01/01/2009",
-                    finish: "01/05/2009",
+                    start: "01/01/2013",
+                    finish: "01/05/2013",
                     effortDriven: (i % 5 == 0)
                 };
             }
 
+            // Need to use a DataView for the filter plugin
             var dataView = new Slick.Data.DataView();
 
             grid = new Slick.Grid("#grid", dataView, columns, options);
@@ -111,10 +113,12 @@
 
             var filterPlugin = new Ext.Plugins.HeaderFilter({});
 
+            // This event is fired when a filter is selected
             filterPlugin.onFilterApplied.subscribe(function () {
                 dataView.refresh();
                 grid.resetActiveCell();
 
+                // Excel like status bar at the bottom
                 var status;
 
                 if (dataView.getLength() === dataView.getItems().length) {
@@ -125,36 +129,30 @@
                 $('#status-label').text(status);
             });
 
+            // Event fired when a menu option is selected
             filterPlugin.onCommand.subscribe(function (e, args) {
-                var comparer = function (a, b) {
-                    return a[args.column.field] > b[args.column.field];
-                };
-
-                switch (args.command) {
-                    case "sort-asc":
-                        dataView.sort(comparer, true);
-                        break;
-                    case "sort-desc":
-                        dataView.sort(comparer, false);
-                        break;
-                }
+                dataView.fastSort(args.column.field, args.command === "sort-asc");
             });
 
             grid.registerPlugin(filterPlugin);
 
             var overlayPlugin = new Ext.Plugins.Overlays({});
 
+            // Event fires when a range is selected
             overlayPlugin.onFillUpDown.subscribe(function (e, args) {
                 var column = grid.getColumns()[args.range.fromCell];
 
+                // Ensure the column is editable
                 if (!column.editor) {
                     return;
                 }
 
+                // Find the initial value
                 var value = dataView.getItem(args.range.fromRow)[column.field];
 
                 dataView.beginUpdate();
 
+                // Copy the value down
                 for (var i = args.range.fromRow + 1; i <= args.range.toRow; i++) {
                     dataView.getItem(i)[column.field] = value;
                     grid.invalidateRow(i);
@@ -168,6 +166,7 @@
 
             grid.init();
 
+            // Filter the data (using userscore's _.contains)
             function filter(item) {
                 var columns = grid.getColumns();
 
