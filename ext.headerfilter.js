@@ -7,6 +7,14 @@
         }
     });
 
+    /*
+    Based on SlickGrid Header Menu Plugin (https://github.com/mleibman/SlickGrid/blob/master/plugins/slick.headermenu.js)
+
+    (Can't be used at the same time as the header menu plugin as it implements the dropdown in the same way)
+
+
+    */
+
     function HeaderFilter(options) {
         var grid;
         var self = this;
@@ -96,14 +104,17 @@
 
             columnDef.filterValues = columnDef.filterValues || [];
 
+            // WorkingFilters is a copy of the filters to enable apply/cancel behaviour
             var workingFilters = columnDef.filterValues.slice(0);
 
             var filterItems;
 
             if (workingFilters.length === 0) {
+                // Filter based all available values
                 filterItems = getFilterValues(grid.getData(), columnDef);
             }
             else {
+                // Filter based on current dataView subset
                 filterItems = getAllFilterValues(grid.getData().getItems(), columnDef);
             }
 
@@ -241,11 +252,11 @@
 
             hideMenu();
 
-                self.onCommand.notify({
-                    "grid": grid,
-                    "column": columnDef,
-                    "command": command
-                }, e, self);
+            self.onCommand.notify({
+                "grid": grid,
+                "column": columnDef,
+                "command": command
+            }, e, self);
 
             e.preventDefault();
             e.stopPropagation();
