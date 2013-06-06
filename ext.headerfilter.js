@@ -241,13 +241,11 @@
 
             hideMenu();
 
-            if (command !== null && command !== '') {
                 self.onCommand.notify({
                     "grid": grid,
                     "column": columnDef,
                     "command": command
                 }, e, self);
-            }
 
             e.preventDefault();
             e.stopPropagation();

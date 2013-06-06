@@ -114,13 +114,13 @@
             $rowOverlay.toggle(cellPosition.visible);
             $headerOverlay.toggle(cellPosition.visible);
 
-            var headerWidth = Math.min(cellPosition.width,
+            var headerWidth = Math.min(cellPosition.width + 3,
                                        gridPosition.width - cellPosition.left + 4);
 
             $headerOverlay.css({
                 left: cellPosition.left - 2,
                 top: gridPosition.top + headerHeight - 2,
-                width: headerWidth + 2,
+                width: headerWidth,
                 height: 2
             });
 
@@ -142,6 +142,10 @@
 
             var column = grid.getColumns()[activeCell.cell];
             selectionOverlay.toggle(true);
+
+            // Only show the handle if the cell is editable
+            console.log(typeof (column.editor) === 'undefined');
+            selectionOverlay.$handle.toggle(typeof (column.editor) !== 'undefined');
 
             var position = grid.getCellNodeBox(activeCell.row, activeCell.cell);
 
@@ -263,7 +267,7 @@
             this.$bottom = $('<div>').addClass('header-overlay').appendTo(target);
             this.$handle = $('<div>').addClass("handle-overlay").appendTo(target);
 
-            this.toggle = function(showOrHide) {
+            this.toggle = function (showOrHide) {
                 this.$left.toggle(showOrHide);
                 this.$right.toggle(showOrHide);
                 this.$top.toggle(showOrHide);
