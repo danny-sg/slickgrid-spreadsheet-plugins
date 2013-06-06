@@ -18,7 +18,7 @@
 
         .excel-grid {
             position: absolute;
-            top: 0;
+            top: 55px;
             left: 0;
             right: 0;
             bottom: 26px;
@@ -30,6 +30,12 @@
     </style>
 </head>
 <body>
+    <div>
+        <ul>
+            <li>Demonstrates the Row and Header overlays, the Selected Cell overlay, filter, and Fill Down</li>
+            <li>The <i>Title</i> column is editable so has the fill down function enabled</li>
+        </ul>
+    </div>
     <div id="grid" class="excel-grid">
     </div>
     <div id="status">
@@ -50,13 +56,13 @@
     <script>
         var grid;
         var columns = [
-    { id: "id", name: "Id", field: "id", width: 80 },
-    { id: "title", name: "Title", field: "title", editor: Slick.Editors.Text, width: 180 },
-    { id: "duration", name: "Duration", field: "duration", width: 100 },
-    { id: "pc", name: "% Complete", field: "percentComplete", width: 100 },
-    { id: "start", name: "Start", field: "start", width: 80 },
-    { id: "finish", name: "Finish", field: "finish", width: 80 },
-    { id: "effort-driven", name: "Effort Driven", field: "effortDriven", width: 120 }
+            { id: "id", name: "Id", field: "id", width: 80 },
+            { id: "title", name: "Title", field: "title", editor: Slick.Editors.Text, width: 180 },
+            { id: "duration", name: "Duration", field: "duration", width: 100 },
+            { id: "pc", name: "% Complete", field: "percentComplete", width: 100 },
+            { id: "start", name: "Start", field: "start", width: 80 },
+            { id: "finish", name: "Finish", field: "finish", width: 80 },
+            { id: "effort-driven", name: "Effort Driven", field: "effortDriven", width: 120 }
         ];
 
         var options = {
