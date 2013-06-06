@@ -22,4 +22,5 @@ For examples of the both plugins see:
 
 
 http://danny-sg.github.io/slickgrid-spreadsheet-plugins/examples/example-1-everything.htm (Excel style)
+
 http://danny-sg.github.io/slickgrid-spreadsheet-plugins/examples/example-2-everything.htm (Google Docs style)
