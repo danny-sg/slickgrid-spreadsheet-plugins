@@ -21,7 +21,8 @@
 
         var defaults = {
             buttonCssClass: null,
-            buttonImage: "../images/down.gif"
+            buttonImage: "../images/down.gif",
+            decoratorWidth: 2
         };
 
         function init(g) {
@@ -257,12 +258,32 @@
             e.stopPropagation();
         }
 
-        function Overlay(target) {
-            this.$left = $('<div>').addClass('header-overlay').appendTo(target);
-            this.$right = $('<div>').addClass('header-overlay').appendTo(target);
-            this.$top = $('<div>').addClass('header-overlay').appendTo(target);
-            this.$bottom = $('<div>').addClass('header-overlay').appendTo(target);
-            this.$handle = $('<div>').addClass("handle-overlay").appendTo(target);
+        function Overlay(target, prefix) {
+            var className = (prefix || '') + 'cell-overlay';
+
+            this.$left = $('<div>')
+                .addClass(className)
+                .addClass('left')
+                .appendTo(target);
+            
+            this.$right = $('<div>')
+                .addClass(className)
+                .addClass('right')
+                .appendTo(target);
+            
+            this.$top = $('<div>')
+                .addClass(className)
+                .addClass('top')
+                .appendTo(target);
+            
+            this.$bottom = $('<div>')
+                .addClass(className)
+                .addClass('bottom')
+                .appendTo(target);
+            
+            this.$handle = $('<div>')
+                .addClass("handle-overlay")
+                .appendTo(target);
 
             this.toggle = function (showOrHide) {
                 this.$left.toggle(showOrHide);
@@ -280,7 +301,7 @@
             function show(range) {
                 r = range;
                 if (!decorator) {
-                    decorator = new Overlay(grid.getCanvasNode());
+                    decorator = new Overlay(grid.getCanvasNode(), 'selection-');
                 }
 
                 var from = targetGrid.getCellNodeBox(range.fromRow, range.fromCell);
@@ -290,27 +311,27 @@
                     top: from.top - 2,
                     left: from.left - 2,
                     height: to.bottom - from.top + 2,
-                    width: 2
+                    width: options.decoratorWidth
                 });
 
                 decorator.$right.css({
                     top: from.top - 2,
                     left: to.right - 1,
                     height: to.bottom - from.top + 2,
-                    width: 2
+                    width: options.decoratorWidth
                 });
 
                 decorator.$top.css({
                     top: from.top - 2,
                     left: to.left - 1,
-                    height: 2,
+                    height: options.decoratorWidth,
                     width: to.right - from.left + 2
                 });
 
                 decorator.$bottom.css({
                     top: to.bottom - 1,
                     left: from.left - 2,
-                    height: 2,
+                    height: options.decoratorWidth,
                     width: to.right - from.left + 3
                 });
 
