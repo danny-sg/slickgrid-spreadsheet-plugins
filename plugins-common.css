@@ -83,7 +83,7 @@ label
     border-color: #BFBDBD;
 }
 
-.header-overlay
+.header-overlay, .cell-overlay, .selection-cell-overlay
 {
 
     display: block;
@@ -91,19 +91,4 @@ label
     z-index: 999;
 }
 
-.handle-overlay
-{
-    border: 1px solid white;
-    padding: 2px;
-    background-color: #217346;
-    position: absolute;
-    width: 1px;
-    z-index: 1000;
-    cursor: crosshair;
-}
 
-.overlay-handle-decorator
-{
-    border: 2px solid #217346;
-    z-index: 1000;
-}
