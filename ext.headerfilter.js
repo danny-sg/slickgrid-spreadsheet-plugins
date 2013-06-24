@@ -23,7 +23,8 @@
             buttonImage: "../images/down.png",
             filterImage: "../images/filter.png",
             sortAscImage: "../images/sort-asc.png",
-            sortDescImage: "../images/sort-desc.png"
+            sortDescImage: "../images/sort-desc.png",
+            sortAvailable: true
         };
         var $menu;
 
@@ -99,6 +100,7 @@
         }
 
         function showFilter(e) {
+            e.stopPropagation();
             var $menuButton = $(this);
             var columnDef = $menuButton.data("column");
 
@@ -124,8 +126,10 @@
 
             $menu.empty();
 
-            addMenuItem($menu, columnDef, 'Sort Ascending', 'sort-asc', options.sortAscImage);
-            addMenuItem($menu, columnDef, 'Sort Descending', 'sort-desc', options.sortDescImage);
+            if(options.sortAvailable) {
+              addMenuItem($menu, columnDef, 'Sort Ascending', 'sort-asc', options.sortAscImage);
+              addMenuItem($menu, columnDef, 'Sort Descending', 'sort-desc', options.sortDescImage);
+            }
 
             var filterOptions = "<label><input type='checkbox' value='-1' />(Select All)</label>";
 
