@@ -60,8 +60,9 @@
         }
 
         function handleHeaderCellRendered(e, args) {
-            console.log('handleHeaderCellRendered');
+            //console.log('handleHeaderCellRendered');
             var column = args.column;
+            if(column.unfiltered) { return false; }
 
             var $el = $("<div></div>")
                 .addClass("slick-header-menubutton")
