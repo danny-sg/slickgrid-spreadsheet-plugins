@@ -42,7 +42,7 @@
             <li>Demonstrates the Row and Header overlays, the Selected Cell overlay, filter, and Fill Down</li>
             <li>The <i>Title</i> column is editable so has the fill down function enabled</li>
             <li>Sorting from the filer menu is turned off. Columns can be sorted by clicking on the header. Multi-sort works by holding down shift when clicking on a second header</li>
-            <li>The search box allows for searching all columns within filtered rows</li>
+            <li>The search box allows for searching all columns within filtered rows: <input type='text' id='search' placeholder='Search...' style='width:100px;margin-left:20px;' /></li>
             <li>The Row column has filtering turned off</li>
         </ul>
     </div>
@@ -65,6 +65,7 @@
     <script type="text/javascript" src="../ext.overlays.js"></script>
     <script>
         var grid;
+        var searchString = '';
         var columns = [
             { id: "rn", name: "row", field: "rn", width: 40, cannotTriggerInsert:true, resizable:false, unselectable:true, sortable:false, unfiltered:true },
             { id: "id", name: "Id", field: "id", width: 80, sortable:true },
@@ -138,6 +139,9 @@
 
             dataView.beginUpdate();
             dataView.setItems(data);
+            dataView.setFilterArgs({
+              searchString: searchString
+            });
             dataView.setFilter(filter);
             dataView.endUpdate();
 
@@ -196,11 +200,35 @@
 
             grid.init();
 
+            $('#search').keyup(function (e) {
+              Slick.GlobalEditorLock.cancelCurrentEdit();
+
+              // clear on Esc
+              if (e.which == 27) {
+                this.value = "";
+              }
+
+              searchString = this.value;
+              updateFilter();
+            });
+
+            function updateFilter() {
+              dataView.setFilterArgs({
+                searchString: searchString
+              });
+              dataView.refresh();
+            }
+
             // Filter the data (using userscore's _.contains)
-            function filter(item) {
-                var columns = grid.getColumns();
+            function filter(item, args) {
+                // Get columns, but exclude non-filterable ones.
+                var columns = [];
+                $.each(grid.getColumns(), function(i,val) {
+                  if(!val.unfiltered) { columns.push(val); }
+                });
 
                 var value = true;
+                var searchHit = false;
 
                 for (var i = 0; i < columns.length; i++) {
                     var col = columns[i];
@@ -209,6 +237,15 @@
                     if (filterValues && filterValues.length > 0) {
                         value = value & _.contains(filterValues, item[col.field]);
                     }
+                }
+                if(value && args.searchString != '') {
+                  for (var i = 0; i < columns.length; i++) {
+                      var col = columns[i];
+                      if (String(item[col.field]).toLowerCase().indexOf(args.searchString.toLowerCase()) !== -1) {
+                        searchHit = true;
+                      }
+                  }
+                  return searchHit;
                 }
                 return value;
             }
