@@ -101,7 +101,6 @@
         }
 
         function showFilter(e) {
-            e.stopPropagation();
             var $menuButton = $(this);
             var columnDef = $menuButton.data("column");
 
@@ -175,6 +174,10 @@
 
             $menu.css("top", offset.top + $(this).height())
                  .css("left", (left > 0 ? left : 0));
+            // Stop propagation so that it doesn't register as a header click event.
+            // THIS CORRECTLY STOPS THE HEADER SORT, BUT THEN ALSO BLOCKS BEHAVIOUR OF THE CLEAR BUTTON...
+            // e.preventDefault();
+            // e.stopPropagation();
         }
 
         function columnsResized() {
