@@ -155,10 +155,10 @@
 
             $('<button>Clear</button>')
                 .appendTo($menu)
-                .bind('click', function () {
+                .bind('click', function (ec) {
                     columnDef.filterValues.length = 0;
                     setButtonImage($menuButton, false);
-                    handleApply(e, columnDef);
+                    handleApply(ec, columnDef);
                 });
 
             $('<button>Cancel</button>')
@@ -174,10 +174,10 @@
 
             $menu.css("top", offset.top + $(this).height())
                  .css("left", (left > 0 ? left : 0));
+
             // Stop propagation so that it doesn't register as a header click event.
-            // THIS CORRECTLY STOPS THE HEADER SORT, BUT THEN ALSO BLOCKS BEHAVIOUR OF THE CLEAR BUTTON...
-            // e.preventDefault();
-            // e.stopPropagation();
+            e.preventDefault();
+            e.stopPropagation();
         }
 
         function columnsResized() {
