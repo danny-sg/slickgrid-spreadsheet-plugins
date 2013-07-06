@@ -137,6 +137,18 @@
               }, true);
             }
 
+            function showStatusCounts() {
+                // Excel like status bar at the bottom
+                var status;
+
+                if (dataView.getLength() === dataView.getItems().length) {
+                    status = "";
+                } else {
+                    status = dataView.getLength() + ' OF ' + dataView.getItems().length + ' RECORDS FOUND';
+                }
+                $('#status-label').text(status);
+            }
+
             dataView.beginUpdate();
             dataView.setItems(data);
             dataView.setFilterArgs({
@@ -151,16 +163,8 @@
             filterPlugin.onFilterApplied.subscribe(function () {
                 dataView.refresh();
                 grid.resetActiveCell();
+                showStatusCounts();
 
-                // Excel like status bar at the bottom
-                var status;
-
-                if (dataView.getLength() === dataView.getItems().length) {
-                    status = "";
-                } else {
-                    status = dataView.getLength() + ' OF ' + dataView.getItems().length + ' RECORDS FOUND';
-                }
-                $('#status-label').text(status);
             });
 
             // Event fired when a menu option is selected
@@ -217,6 +221,7 @@
                 searchString: searchString
               });
               dataView.refresh();
+              showStatusCounts();
             }
 
             // Filter the data (using userscore's _.contains)
