@@ -151,10 +151,10 @@
 
             $('<button>Clear</button>')
                 .appendTo($menu)
-                .bind('click', function () {
+                .bind('click', function (ev) {
                     columnDef.filterValues.length = 0;
                     setButtonImage($menuButton, false);
-                    handleApply(e, columnDef);
+                    handleApply(ev, columnDef);
                 });
 
             $('<button>Cancel</button>')
