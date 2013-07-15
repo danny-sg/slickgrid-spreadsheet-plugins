@@ -1,0 +1,260 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        
+        <!--Example based on SlickGrid examples - https://github.com/mleibman/SlickGrid/tree/master/examples -->
+        <meta http-equiv="Content-Type" content="text/html">
+        <title>SlickGrid Filter and Overlay example</title>
+        <link rel="stylesheet" href="../css/slick.grid.css" type="text/css" />
+        <link rel="stylesheet" href="../plugins-common.css" type="text/css" />
+        <link rel="stylesheet" href="../plugins-excel-style.css" type="text/css" />
+        <style>
+            #status {
+                position: absolute;
+                bottom: 0;
+                background-color: #217346;
+                color: white;
+                height: 26px;
+                width: 100%;
+            }
+
+            .excel-grid {
+                position: absolute;
+                top: 95px;
+                left: 0;
+                right: 0;
+                bottom: 26px;
+            }
+            .slick-sort-indicator {
+              float:right;
+              margin-right:20px;
+              margin-top: -10px;
+            }
+
+            #status-label {
+                margin: 4px;
+            }
+        </style>
+    </head>
+<body>
+    <div>
+        <ul>
+            <li>Demonstrates the Row and Header overlays, the Selected Cell overlay, filter, and Fill Down</li>
+            <li>The <i>Title</i> column is editable so has the fill down function enabled</li>
+            <li>Sorting from the filer menu is turned off. Columns can be sorted by clicking on the header. Multi-sort works by holding down shift when clicking on a second header</li>
+            <li>The search box allows for searching all columns within filtered rows: <input type='text' id='search' placeholder='Search...' style='width:100px;margin-left:20px;' /></li>
+            <li>The Row column has filtering turned off</li>
+        </ul>
+    </div>
+    <div id="grid" class="excel-grid">
+    </div>
+    <div id="status">
+        <label id="status-label"></label>
+    </div>
+    <script type="text/javascript" src="../scripts/jquery-1.10.1.js"></script>
+    <script type="text/javascript" src="../scripts/jquery.event.drag.js"></script>
+    <script type="text/javascript" src="../scripts/SlickGrid/slick.core.js"></script>
+    <script type="text/javascript" src="../scripts/SlickGrid/slick.grid.js"></script>
+    <script type="text/javascript" src="../scripts/SlickGrid/slick.dataview.js"></script>
+    <script type="text/javascript" src="../scripts/SlickGrid/slick.editors.js"></script>
+    <script type="text/javascript" src="../scripts/SlickGrid/Plugins/slick.cellrangeselector.js"></script>
+    <script type="text/javascript" src="../scripts/SlickGrid/Plugins/slick.cellselectionmodel.js"></script>
+    <script type="text/javascript" src="../scripts/SlickGrid/Plugins/slick.cellrangedecorator.js"></script>
+    <script type="text/javascript" src="../scripts/underscore.js"></script>
+    <script type="text/javascript" src="../ext.headerfilter.js"></script>
+    <script type="text/javascript" src="../ext.overlays.js"></script>
+    <script>
+        var grid;
+        var searchString = '';
+        var columns = [
+            { id: "rn", name: "row", field: "rn", width: 40, cannotTriggerInsert:true, resizable:false, unselectable:true, sortable:false, unfiltered:true },
+            { id: "id", name: "Id", field: "id", width: 80, sortable:true },
+            { id: "title", name: "Title", field: "title", editor: Slick.Editors.Text, width: 180, sortable:true },
+            { id: "duration", name: "Duration", field: "duration", width: 100, sortable:true },
+            { id: "pc", name: "% Complete", field: "percentComplete", width: 100, sortable:true },
+            { id: "start", name: "Start", field: "start", width: 80, sortable:true },
+            { id: "finish", name: "Finish", field: "finish", width: 80, sortable:true },
+            { id: "effort-driven", name: "Effort Driven", field: "effortDriven", width: 120, sortable:true }
+        ];
+
+        var options = {
+            enableCellNavigation: true,
+            enableColumnReorder: false,
+            explicitInitialization: true,
+            editable: true,
+            rowHeight: 22,
+            multiColumnSort: true
+        };
+
+        $(function () {
+            var data = [];
+            for (var i = 0; i < 500; i++) {
+                data[i] = {
+                    rn: i+1,
+                    id: i,
+                    title: "Task " + i,
+                    duration: i % 20 + " days",
+                    percentComplete: Math.round(Math.random() * 100),
+                    start: "01/01/2013",
+                    finish: "01/05/2013",
+                    effortDriven: (i % 5 == 0)
+                };
+            }
+
+            // Need to use a DataView for the filter plugin
+            var dataView = new Slick.Data.DataView();
+
+            grid = new Slick.Grid("#grid", dataView, columns, options);
+
+            grid.setSelectionModel(new Slick.CellSelectionModel());
+
+            dataView.onRowCountChanged.subscribe(function (e, args) {
+                grid.updateRowCount();
+                grid.render();
+            });
+
+            dataView.onRowsChanged.subscribe(function (e, args) {
+                grid.invalidateRows(args.rows);
+                grid.render();
+            });
+
+            grid.onSort.subscribe(function (e, args) {
+              gridSorter(args.sortCols, dataView);
+            });
+
+            function gridSorter(sortCols, dataview) {
+              dataview.sort(function (row1, row2) {
+                for (var i = 0, l = sortCols.length; i < l; i++) {
+                    var field = sortCols[i].sortCol.field;
+                    var sign = sortCols[i].sortAsc ? 1 : -1;
+                    var x = row1[field], y = row2[field];
+                    var result = (x < y ? -1 : (x > y ? 1 : 0)) * sign;
+                    if (result != 0) {
+                        return result;
+                    }
+                }
+                return 0;
+              }, true);
+            }
+
+            function showStatusCounts() {
+                // Excel like status bar at the bottom
+                var status;
+
+                if (dataView.getLength() === dataView.getItems().length) {
+                    status = "";
+                } else {
+                    status = dataView.getLength() + ' OF ' + dataView.getItems().length + ' RECORDS FOUND';
+                }
+                $('#status-label').text(status);
+            }
+
+            dataView.beginUpdate();
+            dataView.setItems(data);
+            dataView.setFilterArgs({
+              searchString: searchString
+            });
+            dataView.setFilter(filter);
+            dataView.endUpdate();
+
+            var filterPlugin = new Ext.Plugins.HeaderFilter({sortAvailable: false});
+
+            // This event is fired when a filter is selected
+            filterPlugin.onFilterApplied.subscribe(function () {
+                dataView.refresh();
+                grid.resetActiveCell();
+                showStatusCounts();
+
+            });
+
+            // Event fired when a menu option is selected
+            filterPlugin.onCommand.subscribe(function (e, args) {
+                dataView.fastSort(args.column.field, args.command === "sort-asc");
+            });
+
+            grid.registerPlugin(filterPlugin);
+
+            var overlayPlugin = new Ext.Plugins.Overlays({});
+
+            // Event fires when a range is selected
+            overlayPlugin.onFillUpDown.subscribe(function (e, args) {
+                var column = grid.getColumns()[args.range.fromCell];
+
+                // Ensure the column is editable
+                if (!column.editor) {
+                    return;
+                }
+
+                // Find the initial value
+                var value = dataView.getItem(args.range.fromRow)[column.field];
+
+                dataView.beginUpdate();
+
+                // Copy the value down
+                for (var i = args.range.fromRow + 1; i <= args.range.toRow; i++) {
+                    dataView.getItem(i)[column.field] = value;
+                    grid.invalidateRow(i);
+                }
+
+                dataView.endUpdate();
+                grid.render();
+            });
+
+            grid.registerPlugin(overlayPlugin);
+
+            grid.init();
+
+            $('#search').keyup(function (e) {
+              Slick.GlobalEditorLock.cancelCurrentEdit();
+
+              // clear on Esc
+              if (e.which == 27) {
+                this.value = "";
+              }
+
+              searchString = this.value;
+              updateFilter();
+            });
+
+            function updateFilter() {
+              dataView.setFilterArgs({
+                searchString: searchString
+              });
+              dataView.refresh();
+              showStatusCounts();
+            }
+
+            // Filter the data (using userscore's _.contains)
+            function filter(item, args) {
+                // Get columns, but exclude non-filterable ones.
+                var columns = [];
+                $.each(grid.getColumns(), function(i,val) {
+                  if(!val.unfiltered) { columns.push(val); }
+                });
+
+                var value = true;
+                var searchHit = false;
+
+                for (var i = 0; i < columns.length; i++) {
+                    var col = columns[i];
+                    var filterValues = col.filterValues;
+
+                    if (filterValues && filterValues.length > 0) {
+                        value = value & _.contains(filterValues, item[col.field]);
+                    }
+                }
+                if(value && args.searchString != '') {
+                  for (var i = 0; i < columns.length; i++) {
+                      var col = columns[i];
+                      if (String(item[col.field]).toLowerCase().indexOf(args.searchString.toLowerCase()) !== -1) {
+                        searchHit = true;
+                      }
+                  }
+                  return searchHit;
+                }
+                return value;
+            }
+        });
+    </script>
+</body>
+</html>

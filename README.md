@@ -10,6 +10,10 @@ This adds a filter to the column header, displaying an ordered list of the value
 
 The plugin relies on the grid data being sourced from a DataView as it handles the filtering.
 
+Options:
+* sortAvailable (default: true). Set to false to remove the ability to sort columns via the plugin.
+* Column option: unfiltered (If set to true, that column will not have a header filter available).
+
 Overlays (ext.overlays.js)
 --------
 

@@ -23,7 +23,8 @@
             buttonImage: "../images/down.png",
             filterImage: "../images/filter.png",
             sortAscImage: "../images/sort-asc.png",
-            sortDescImage: "../images/sort-desc.png"
+            sortDescImage: "../images/sort-desc.png",
+            sortAvailable: true
         };
         var $menu;
 
@@ -59,8 +60,9 @@
         }
 
         function handleHeaderCellRendered(e, args) {
-            console.log('handleHeaderCellRendered');
+            //console.log('handleHeaderCellRendered');
             var column = args.column;
+            if(column.unfiltered) { return false; }
 
             var $el = $("<div></div>")
                 .addClass("slick-header-menubutton")
@@ -124,8 +126,10 @@
 
             $menu.empty();
 
-            addMenuItem($menu, columnDef, 'Sort Ascending', 'sort-asc', options.sortAscImage);
-            addMenuItem($menu, columnDef, 'Sort Descending', 'sort-desc', options.sortDescImage);
+            if(options.sortAvailable) {
+              addMenuItem($menu, columnDef, 'Sort Ascending', 'sort-asc', options.sortAscImage);
+              addMenuItem($menu, columnDef, 'Sort Descending', 'sort-desc', options.sortDescImage);
+            }
 
             var filterOptions = "<label><input type='checkbox' value='-1' />(Select All)</label>";
 
@@ -151,10 +155,10 @@
 
             $('<button>Clear</button>')
                 .appendTo($menu)
-                .bind('click', function () {
+                .bind('click', function (ec) {
                     columnDef.filterValues.length = 0;
                     setButtonImage($menuButton, false);
-                    handleApply(e, columnDef);
+                    handleApply(ec, columnDef);
                 });
 
             $('<button>Cancel</button>')
@@ -170,6 +174,10 @@
 
             $menu.css("top", offset.top + $(this).height())
                  .css("left", (left > 0 ? left : 0));
+
+            // Stop propagation so that it doesn't register as a header click event.
+            e.preventDefault();
+            e.stopPropagation();
         }
 
         function columnsResized() {
