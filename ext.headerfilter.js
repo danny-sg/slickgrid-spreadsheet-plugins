@@ -1,4 +1,10 @@
+// From https://github.com/danny-sg/slickgrid-spreadsheet-plugins
 (function ($) {
+
+    //TODO: Do something better than this? 
+	//Need to allow searching the filters maybe like Excel?
+    var MAX_FILTER_COUNT = 1000;
+        
     $.extend(true, window, {
         "Ext": {
             "Plugins": {
@@ -7,25 +13,17 @@
         }
     });
 
-    /*
-    Based on SlickGrid Header Menu Plugin (https://github.com/mleibman/SlickGrid/blob/master/plugins/slick.headermenu.js)
-
-    (Can't be used at the same time as the header menu plugin as it implements the dropdown in the same way)
-
-
-    */
-
     function HeaderFilter(options) {
         var grid;
         var self = this;
         var handler = new Slick.EventHandler();
         var defaults = {
-            buttonImage: "../images/down.png",
-            filterImage: "../images/filter.png",
-            sortAscImage: "../images/sort-asc.png",
-            sortDescImage: "../images/sort-desc.png"
+            filterClass: "ext-filtered",
+            sortAscClass: "ext-sort-asc",
+            sortDescClass: "ext-sort-desc"
         };
         var $menu;
+        var baseFilter;
 
         function init(g) {
             options = $.extend(true, {}, defaults, options);
@@ -35,6 +33,7 @@
                    .subscribe(grid.onClick, handleBodyMouseDown)
                    .subscribe(grid.onColumnsResized, columnsResized);
 
+            //JB: Not sure why this is needed???
             grid.setColumns(grid.getColumns());
 
             $(document.body).bind("mousedown", handleBodyMouseDown);
@@ -58,19 +57,22 @@
             }
         }
 
-        function handleHeaderCellRendered(e, args) {
-            console.log('handleHeaderCellRendered');
+        function handleHeaderCellRendered(e, args) {            
             var column = args.column;
 
-            var $el = $("<div></div>")
-                .addClass("slick-header-menubutton")
-                .data("column", column);
+            if (typeof (column.filterable) === 'undefined' || column.filterable) {
+                var $el = $("<div></div>")
+                    .addClass("slick-header-menubutton")
+                    .data("column", column);
 
-            if (options.buttonImage) {
-                $el.css("background-image", "url(" + options.buttonImage + ")");
+                setButtonImage($el, column.filterValues && column.filterValues.length);
+
+                //if (options.buttonImage) {
+                //    $el.css("background-image", "url(" + options.buttonImage + ")");
+                //}
+
+                $el.bind("click", showFilter).appendTo(args.node);
             }
-
-            $el.bind("click", showFilter).appendTo(args.node);
         }
 
         function handleBeforeHeaderCellDestroy(e, args) {
@@ -79,7 +81,7 @@
                 .remove();
         }
 
-        function addMenuItem(menu, columnDef, title, command, image) {
+        function addMenuItem(menu, columnDef, title, command, className) {
             var $item = $("<div class='slick-header-menuitem'>")
                          .data("command", command)
                          .data("column", columnDef)
@@ -89,13 +91,23 @@
             var $icon = $("<div class='slick-header-menuicon'>")
                          .appendTo($item);
 
-            if (image) {
-                $icon.css("background-image", "url(" + image + ")");
+            if (className) {
+                $icon.addClass(className);
             }
 
             $("<span class='slick-header-menucontent'>")
              .text(title)
              .appendTo($item);
+        }
+
+        function formatValue(value, columnDef) {
+            if (value == null)
+                return '(Blank)';
+            else if (columnDef.formatter) {
+                return columnDef.formatter(null, null, value, columnDef, null);
+            } else {
+                return value;
+            }
         }
 
         function showFilter(e) {
@@ -106,35 +118,40 @@
 
             // WorkingFilters is a copy of the filters to enable apply/cancel behaviour
             var workingFilters = columnDef.filterValues.slice(0);
-
             var filterItems;
 
-            if (workingFilters.length === 0) {
-                // Filter based all available values
-                filterItems = getFilterValues(grid.getData(), columnDef);
-            }
-            else {
-                // Filter based on current dataView subset
-                filterItems = getAllFilterValues(grid.getData().getItems(), columnDef);
-            }
-
+            filterItems = getAllFilterValues(grid.getData().getItems(), columnDef);
+            
             if (!$menu) {
                 $menu = $("<div class='slick-header-menu'>").appendTo(document.body);
             }
 
             $menu.empty();
 
-            addMenuItem($menu, columnDef, 'Sort Ascending', 'sort-asc', options.sortAscImage);
-            addMenuItem($menu, columnDef, 'Sort Descending', 'sort-desc', options.sortDescImage);
+            if (columnDef.sortable) {
+                addMenuItem($menu, columnDef, 'Sort Ascending', 'sort-asc', options.sortAscClass);
+                addMenuItem($menu, columnDef, 'Sort Descending', 'sort-desc', options.sortDescClass);
+            }
 
-            var filterOptions = "<label><input type='checkbox' value='-1' />(Select All)</label>";
+            var filterOptions = '';
+
+            if (filterItems === null) {
+                if (workingFilters.length > 0) {
+                    filterItems = workingFilters;
+                } else {
+                    filterItems = [];
+                }
+                filterOptions += "<span style='color: red'>There are too many options to show.</span>";
+            }
+
+            filterOptions += "<label><input type='checkbox' value='-1' />(Select All)</label>";
 
             for (var i = 0; i < filterItems.length; i++) {
                 var filtered = _.contains(workingFilters, filterItems[i]);
 
                 filterOptions += "<label><input type='checkbox' value='" + i + "'"
                                  + (filtered ? " checked='checked'" : "")
-                                 + "/>" + filterItems[i] + "</label>";
+                                 + "/>" + formatValue(filterItems[i], columnDef) + "</label>";
             }
 
             var $filter = $("<div class='filter'>")
@@ -144,9 +161,9 @@
             $('<button>OK</button>')
                 .appendTo($menu)
                 .bind('click', function (ev) {
-                    columnDef.filterValues = workingFilters.splice(0);
+                    columnDef.filterValues = workingFilters.splice(0);                    
                     setButtonImage($menuButton, columnDef.filterValues.length > 0);
-                    handleApply(ev, columnDef);
+                    handleApply(ev, columnDef);                   
                 });
 
             $('<button>Clear</button>')
@@ -166,17 +183,20 @@
             });
 
             var offset = $(this).offset();
-            var left = offset.left - $menu.width() + $(this).width() - 8;			
-			var top = offset.top + $(this).height();
-			var bottom = offset.top + $(this).height() + $menu[0].offsetHeight;
-			var windowHeight = $(window).height();
-						
-			if (bottom >= windowHeight) {
-				$filter.css('height', $filter.height() - (bottom - windowHeight) - 1);
-			}
-			
+            var left = offset.left - $menu.width() + $(this).width() - 8;
+            var top = offset.top + $(this).height();
+            var bottom = offset.top + $(this).height() + $menu[0].offsetHeight;
+            var windowHeight = $(window).height();
+
+            if (bottom >= windowHeight) {
+                $filter.css('height', $filter.height() - (bottom - windowHeight) - 1);
+            }
+
             $menu.css("top", top)
-                 .css("left", (left > 0 ? left : 0));			
+                 .css("left", (left > 0 ? left : 0));
+
+            e.preventDefault();
+            e.stopPropagation();
         }
 
         function columnsResized() {
@@ -213,44 +233,40 @@
         }
 
         function setButtonImage($el, filtered) {
-            var image = "url(" + (filtered ? options.filterImage : options.buttonImage) + ")";
-
-            $el.css("background-image", image);
+            if (filtered) {
+                $el.addClass(options.filterClass);
+            } else {
+                $el.removeClass(options.filterClass);
+            }            
         }
 
         function handleApply(e, columnDef) {
             hideMenu();
 
             self.onFilterApplied.notify({ "grid": grid, "column": columnDef }, e, self);
-
+            
             e.preventDefault();
             e.stopPropagation();
         }
 
-        function getFilterValues(dataView, column) {
+        function getAllFilterValues(data, column) {                        
             var seen = [];
-            for (var i = 0; i < dataView.getLength() ; i++) {
-                var value = dataView.getItem(i)[column.field];
+            var filter = composeCurrentFilter(baseFilter, column);
 
-                if (!_.contains(seen, value)) {
-                    seen.push(value);
-                }
-            }
-
-            return _.sortBy(seen, function (v) { return v; });
-        }
-
-        function getAllFilterValues(data, column) {
-            var seen = [];
             for (var i = 0; i < data.length; i++) {
+                if (!filter(data[i])) {
+                    continue;
+                }
                 var value = data[i][column.field];
-
                 if (!_.contains(seen, value)) {
                     seen.push(value);
+                    if (seen.length >= MAX_FILTER_COUNT) {
+                        return null;
+                    }
                 }
             }
-
-            return _.sortBy(seen, function (v) { return v; });
+                       
+            return _.sortBy(seen, function (v) { return v || undefined; });
         }
 
         function handleMenuItemClick(e) {
@@ -268,12 +284,53 @@
             e.preventDefault();
             e.stopPropagation();
         }
+        
+        // expose a method that can be used to set a filter function that might be used by the dataView that is applied before header filters.        
+        function setBaseFilter(filterFn){
+            baseFilter = filterFn;
+        }
+                
+        function composeCurrentFilter(baseFilterFn, excludeColumn){
+            ///<summary>Creates a filter function that applies all column based filters to a row.</summary>
+            var cols = grid.getColumns();
+            var activeFilters = [];
+            
+            for (var i = 0; i < cols.length; i++) {
+                if (cols[i] !== excludeColumn && cols[i].filterValues && cols[i].filterValues.length) {
+                    activeFilters.push(cols[i]);
+                }
+            }
+
+            return function (row) {
+                if (typeof baseFilterFn === 'function') {
+                    if (!baseFilterFn(row)) {
+                        return false;
+                    }
+                }
+                for (var i = 0; i < activeFilters.length; i++) {                    
+                    // if filter values list does not cell value, return false to filter out row
+                    var result = false;
+                    for (var x = 0; x < activeFilters[i].filterValues.length; x++) {
+                        if (row[activeFilters[i].field] === activeFilters[i].filterValues[x]) {
+                            result = true;
+                            break;
+                        }
+                    }
+                    if (!result) {
+                        return false;
+                    }                  
+                }
+                return true;
+            };
+        }
 
         $.extend(this, {
             "init": init,
             "destroy": destroy,
             "onFilterApplied": new Slick.Event(),
-            "onCommand": new Slick.Event()
+            "onCommand": new Slick.Event(),
+            "setBaseFilter": setBaseFilter,
+//            "composeFilter": composeFilter
         });
     }
 })(jQuery);
