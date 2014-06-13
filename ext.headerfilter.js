@@ -1,4 +1,4 @@
-// From https://github.com/danny-sg/slickgrid-spreadsheet-plugins
+
 (function ($) {
 
     //TODO: Do something better than this? 
@@ -6,7 +6,7 @@
     var MAX_FILTER_COUNT = 1000;
         
     $.extend(true, window, {
-        "Ext": {
+        "Slick": {
             "Plugins": {
                 "HeaderFilter": HeaderFilter
             }
