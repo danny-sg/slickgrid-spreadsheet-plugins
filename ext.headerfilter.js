@@ -168,7 +168,12 @@
             var offset = $(this).offset();
             var left = offset.left - $menu.width() + $(this).width() - 8;
 
-            $menu.css("top", offset.top + $(this).height())
+            var menutop = offset.top + $(this).height();
+
+            if (menutop + offset.top > $(window).height()) {
+                menutop -= ($menu.height() + $(this).height() + 8);
+            }
+            $menu.css("top", menutop)
                  .css("left", (left > 0 ? left : 0));
         }
 
