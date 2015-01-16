@@ -12,7 +12,6 @@
 
     (Can't be used at the same time as the header menu plugin as it implements the dropdown in the same way)
 
-
     */
 
     function HeaderFilter(options) {
@@ -59,7 +58,6 @@
         }
 
         function handleHeaderCellRendered(e, args) {
-            console.log('handleHeaderCellRendered');
             var column = args.column;
 
             var $el = $("<div></div>")
