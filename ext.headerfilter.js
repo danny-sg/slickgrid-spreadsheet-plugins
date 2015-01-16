@@ -11,7 +11,6 @@
     Based on SlickGrid Header Menu Plugin (https://github.com/mleibman/SlickGrid/blob/master/plugins/slick.headermenu.js)
 
     (Can't be used at the same time as the header menu plugin as it implements the dropdown in the same way)
-
     */
 
     function HeaderFilter(options) {
