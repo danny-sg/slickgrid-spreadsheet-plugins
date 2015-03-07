@@ -95,6 +95,38 @@
              .appendTo($item);
         }
 
+        function addMenuInput(menu, columnDef) {
+            $("<input class='input' placeholder='Search' style='margin-top: 5px; width: 206px'>")
+                .data("column", columnDef)
+                .bind("keyup", function (e) {
+                    var filterVals = getFilterValuesByInput($(this));
+                    updateFilterInputs(menu, columnDef, filterVals);
+                })
+                .appendTo(menu);
+        }
+
+        function updateFilterInputs(menu, columnDef, filterItems) {
+            var filterOptions = "<label><input type='checkbox' value='-1' />(Select All)</label>";
+            columnDef.filterValues = columnDef.filterValues || [];
+
+            // WorkingFilters is a copy of the filters to enable apply/cancel behaviour
+            workingFilters = columnDef.filterValues.slice(0);
+
+            for (var i = 0; i < filterItems.length; i++) {
+                var filtered = _.contains(workingFilters, filterItems[i]);
+
+                filterOptions += "<label><input type='checkbox' value='" + i + "'"
+                + (filtered ? " checked='checked'" : "")
+                + "/>" + filterItems[i] + "</label>";
+            }
+            var $filter = menu.find('.filter');
+            $filter.empty().append($(filterOptions));
+
+            $(':checkbox', $filter).bind('click', function () {
+                workingFilters = changeWorkingFilter(filterItems, workingFilters, $(this));
+            });
+        }
+
         function showFilter(e) {
             var $menuButton = $(this);
             var columnDef = $menuButton.data("column");
@@ -123,6 +155,7 @@
 
             addMenuItem($menu, columnDef, 'Sort Ascending', 'sort-asc', options.sortAscImage);
             addMenuItem($menu, columnDef, 'Sort Descending', 'sort-desc', options.sortDescImage);
+            addMenuInput($menu, columnDef);
 
             var filterOptions = "<label><input type='checkbox' value='-1' />(Select All)</label>";
 
@@ -229,6 +262,33 @@
 
                 if (!_.contains(seen, value)) {
                     seen.push(value);
+                }
+            }
+
+            return _.sortBy(seen, function (v) { return v; });
+        }
+
+        function getFilterValuesByInput($input) {
+            var column = $input.data("column"),
+                filter = $input.val(),
+                dataView = grid.getData(),
+                seen = [];
+
+            for (var i = 0; i < dataView.getLength() ; i++) {
+                var value = dataView.getItem(i)[column.field];
+
+                if (filter.length > 0) {
+                    var mVal = !value ? '' : value;
+                    var lowercaseFilter = filter.toString().toLowerCase();
+                    var lowercaseVal = mVal.toString().toLowerCase();
+                    if (!_.contains(seen, value) && lowercaseVal.indexOf(lowercaseFilter) > -1) {
+                        seen.push(value);
+                    }
+                }
+                else {
+                    if (!_.contains(seen, value)) {
+                        seen.push(value);
+                    }
                 }
             }
 
