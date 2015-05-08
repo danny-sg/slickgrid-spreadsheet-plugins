@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+    <metadata>
+        <id>SlickGrid-HeaderFilter</id>
+        <version>1.0.0</version>
+        <title>SlickGrid HeaderFilter plugin based on danny-sg's slickgrid-spreadsheet-plugins</title>
+        <authors>buchanan-csg</authors>
+        <owners>buchanan-csg</owners>
+        <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+        <projectUrl>https://github.com/jusbuc2k/slickgrid-spreadsheet-plugins</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Provides an Excel-inspired header menu based filtering for SlickGrid columns.</description>
+        <summary>Provides Excel-inspired header based filtering of rows in a SlickGrid by providing a checkbox list of distinct values and allowing the user to select those that they want to see matching rows for.</summary>
+        <copyright />
+        <language>en-US</language>
+        <dependencies>
+            <dependency id="SlickGrid" version="2.2.0" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="ext.headerfilter.js" target="content\Scripts\SlickGrid\Plugins\slick.headerfilter.js" />
+    </files>
+</package>
