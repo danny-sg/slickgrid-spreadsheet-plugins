@@ -24,7 +24,8 @@
             sortDescImage: "../images/sort-desc.png"
         };
         var $menu;
-
+		var workingFilters = [];
+		
         function init(g) {
             options = $.extend(true, {}, defaults, options);
             grid = g;
@@ -134,11 +135,11 @@
             columnDef.filterValues = columnDef.filterValues || [];
 
             // WorkingFilters is a copy of the filters to enable apply/cancel behaviour
-            var workingFilters = columnDef.filterValues.slice(0);
+            var workingFiltersLocalCopy = columnDef.filterValues.slice(0);
 
             var filterItems;
 
-            if (workingFilters.length === 0) {
+            if (workingFiltersLocalCopy.length === 0) {
                 // Filter based all available values
                 filterItems = getFilterValues(grid.getData(), columnDef);
             }
@@ -160,7 +161,7 @@
             var filterOptions = "<label><input type='checkbox' value='-1' />(Select All)</label>";
 
             for (var i = 0; i < filterItems.length; i++) {
-                var filtered = _.contains(workingFilters, filterItems[i]);
+                var filtered = _.contains(workingFiltersLocalCopy, filterItems[i]);
 
                 filterOptions += "<label><input type='checkbox' value='" + i + "'"
                                  + (filtered ? " checked='checked'" : "")
@@ -174,7 +175,7 @@
             $('<button>OK</button>')
                 .appendTo($menu)
                 .bind('click', function (ev) {
-                    columnDef.filterValues = workingFilters.splice(0);
+                    columnDef.filterValues = workingFilters.slice(0);
                     setButtonImage($menuButton, columnDef.filterValues.length > 0);
                     handleApply(ev, columnDef);
                 });
@@ -183,6 +184,7 @@
                 .appendTo($menu)
                 .bind('click', function (ev) {
                     columnDef.filterValues.length = 0;
+					workingFilters = [];
                     setButtonImage($menuButton, false);
                     handleApply(ev, columnDef);
                 });
