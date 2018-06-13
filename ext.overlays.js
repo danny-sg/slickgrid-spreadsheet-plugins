@@ -105,7 +105,7 @@
             $(".slick-header > div > div")
                 .removeClass("selected-header");
 
-            $('[id$=' + column.id + ']', '.slick-header')
+            $('[id$="' + column.id + '"]', '.slick-header')
                 .addClass('selected-header');
 
             var headerHeight = $('.slick-header').height();
