@@ -24,6 +24,8 @@
             sortDescImage: "../images/sort-desc.png"
         };
         var $menu;
+        // The currently selected (but not necessarily applied) filters.
+        var workingFilters = [];
 
         function init(g) {
             options = $.extend(true, {}, defaults, options);
@@ -134,7 +136,7 @@
             columnDef.filterValues = columnDef.filterValues || [];
 
             // WorkingFilters is a copy of the filters to enable apply/cancel behaviour
-            var workingFilters = columnDef.filterValues.slice(0);
+            workingFilters = columnDef.filterValues.slice(0);
 
             var filterItems;
 
@@ -211,7 +213,7 @@
             hideMenu();
         }
 
-        function changeWorkingFilter(filterItems, workingFilters, $checkbox) {
+        function changeWorkingFilter(filterItems, baseWorkingFilters, $checkbox) {
             var value = $checkbox.val();
             var $filter = $checkbox.parent().parent();
 
@@ -219,25 +221,25 @@
                 // Select All
                 if ($checkbox.prop('checked')) {
                     $(':checkbox', $filter).prop('checked', true);
-                    workingFilters = filterItems.slice(0);
+                    baseWorkingFilters = filterItems.slice(0);
                 } else {
                     $(':checkbox', $filter).prop('checked', false);
-                    workingFilters.length = 0;
+                    baseWorkingFilters.length = 0;
                 }
             } else {
-                var index = _.indexOf(workingFilters, filterItems[value]);
+                var index = _.indexOf(baseWorkingFilters, filterItems[value]);
 
                 if ($checkbox.prop('checked') && index < 0) {
-                    workingFilters.push(filterItems[value]);
+                    baseWorkingFilters.push(filterItems[value]);
                 }
                 else {
                     if (index > -1) {
-                        workingFilters.splice(index, 1);
+                        baseWorkingFilters.splice(index, 1);
                     }
                 }
             }
 
-            return workingFilters;
+            return baseWorkingFilters;
         }
 
         function setButtonImage($el, filtered) {
